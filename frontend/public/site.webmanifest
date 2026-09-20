@@ -1,0 +1,9 @@
+{
+  "name": "InstaGrab",
+  "short_name": "InstaGrab",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080a12",
+  "theme_color": "#090a12",
+  "icons": [{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
