@@ -167,3 +167,60 @@
 @media(max-width:680px){.navlinks.open{top:68px}.page-hero{padding:56px 0 30px}.page-title{font-size:clamp(43px,13vw,62px)}.page-lede{font-size:15px}.content-card{padding:22px}.footer-links{justify-content:flex-start;gap:12px}}
 
 @media(max-width:650px){.how-device-brand{margin-top:12px}.how-device-url{font-size:4.8px;padding:5px 6px}.how-device-reel{margin-top:7px}.how-reel-thumb{height:52px}.how-device-link{margin-top:5px;padding:5px 6px}.how-device-download{height:25px;bottom:8px;left:8px;right:8px;font-size:6px}}
+
+
+/* Mobile overflow hardening
+   Prevent decorative artwork, grid children, and intrinsic media from creating
+   horizontal scrolling at narrow viewport widths. */
+html,
+body{
+  width:100%;
+  max-width:100%;
+  overflow-x:clip;
+}
+
+img,
+svg,
+video,
+iframe{
+  max-width:100%;
+}
+
+.container,
+.hero-grid,
+.story,
+.steps-wrap,
+.tools,
+.faq,
+.cta-card,
+.how-art,
+.grab-shell{
+  max-width:100%;
+}
+
+.hero-grid > *,
+.story > *,
+.steps-wrap > *,
+.tools > *,
+.faq > *,
+.input-row > *{
+  min-width:0;
+}
+
+@media (max-width:680px){
+  .container{
+    width:calc(100% - 24px);
+    max-width:calc(100% - 24px);
+  }
+
+  .hero-art,
+  .media-stage,
+  .how-art{
+    max-width:100%;
+  }
+
+  .cta-card,
+  .content-card{
+    max-width:100%;
+  }
+}
