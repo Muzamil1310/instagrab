@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+backend/venv/
+venv/
+.env
+.env.*
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Local downloads / generated files
+backend/downloads/
+backend/temp/
+backend/tmp/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Logs
+*.log

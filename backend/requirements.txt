@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+python-multipart
+yt-dlp
+requests
+# Kept as a secondary fallback for Instagram image posts/carousels.
+gallery-dl>=1.32.12
