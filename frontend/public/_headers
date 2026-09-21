@@ -3,3 +3,6 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-Frame-Options: DENY
+
+https://instagrab-be5.pages.dev/*
+  X-Robots-Tag: noindex
