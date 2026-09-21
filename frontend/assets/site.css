@@ -10,7 +10,7 @@
     body:after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 10% 10%,rgba(79,140,255,.08),transparent 28%),radial-gradient(circle at 90% 20%,rgba(255,79,154,.07),transparent 28%);z-index:-1}
     a{color:inherit;text-decoration:none} button,input{font:inherit} button{cursor:pointer}.container{width:min(1180px,calc(100% - 40px));margin:auto}
     header{position:sticky;top:0;z-index:40;background:rgba(8,10,18,.72);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
-    nav{height:78px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk';font-weight:700;font-size:21px}.brand-mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#ff4f9a,#785cff 55%,#3aa9ff);display:grid;place-items:center;box-shadow:0 12px 30px rgba(120,92,255,.25);transform:rotate(-3deg)}.brand-mark svg{width:24px}.brand-name{background:linear-gradient(90deg,#69a9ff,#b579ff,#ff75b0);-webkit-background-clip:text;background-clip:text;color:transparent}.navlinks{display:flex;gap:30px;color:#b9c2d4;font-size:14px;margin-left:auto}.navlinks a{transition:.2s}.navlinks a:hover{color:#fff;transform:translateY(-1px)}.nav-actions{display:flex;align-items:center;gap:9px}.icon-btn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:#fff;border-radius:999px;height:42px;width:42px;padding:0;display:grid;place-items:center}.mobile-menu{display:none}
+    nav{height:78px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk';font-weight:700;font-size:21px}.brand-mark{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;overflow:hidden;flex:none}.brand-mark img{width:42px;height:42px;display:block;object-fit:cover;border-radius:12px}.brand-name{background:linear-gradient(90deg,#69a9ff,#b579ff,#ff75b0);-webkit-background-clip:text;background-clip:text;color:transparent}.navlinks{display:flex;gap:30px;color:#b9c2d4;font-size:14px;margin-left:auto}.navlinks a{transition:.2s}.navlinks a:hover{color:#fff;transform:translateY(-1px)}.nav-actions{display:flex;align-items:center;gap:9px}.icon-btn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:#fff;border-radius:999px;height:42px;width:42px;padding:0;display:grid;place-items:center}.mobile-menu{display:none}
 
     .hero{position:relative;padding:72px 0 64px}.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:center}.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid rgba(69,214,155,.3);background:rgba(69,214,155,.07);border-radius:999px;color:#88f0be;text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:800}.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 15px var(--mint)}
     h1{font-family:'Space Grotesk';font-size:clamp(50px,7vw,88px);line-height:.93;letter-spacing:-.065em;margin:22px 0 22px;max-width:700px}.gradient{background:linear-gradient(95deg,#55a1ff 0%,#9267ff 48%,#ff5b9f 88%);-webkit-background-clip:text;background-clip:text;color:transparent}.hero-copy{font-size:17px;line-height:1.7;color:var(--muted);max-width:590px;margin:0 0 28px}.hand{font-family:'Patrick Hand',cursive}.hero-copy .hand{color:#fff;font-size:25px;display:inline-block;transform:rotate(-2deg);margin-left:6px}
@@ -68,7 +68,7 @@
     @media(max-width:650px){
       .device-brand{margin-top:19px}.device-url{font-size:5.8px;padding:7px 8px}.device-reel{margin-top:10px}.device-reel-thumb{height:102px}.device-link{margin-top:8px;padding:7px 8px}.device-download{height:37px;bottom:12px;left:15px;right:15px;font-size:8px}
     }
-    @media(max-width:650px){.container{width:min(100% - 24px,1180px)}nav{height:68px}.brand{font-size:19px}.brand-mark{width:38px;height:38px}.hero{padding:42px 0 42px}.hero-grid{gap:30px}h1{font-size:clamp(48px,15vw,72px);line-height:.92}.hero-copy{font-size:15px}.input-row{flex-direction:column}.download-btn,.url-wrap{width:100%}.download-btn{height:56px}.url-wrap{height:58px}.grab-foot{align-items:flex-start;flex-direction:column}.hero-art{min-height:450px}.tools{grid-template-columns:1fr}.tool{min-height:230px}.section-block,section.block{padding:78px 0}.section-title{font-size:43px}.story-card{padding:26px;min-height:330px}.story-card h3{font-size:31px}.stats{grid-template-columns:1fr}.faq{grid-template-columns:1fr}.cta-card{padding:30px 22px}.footer-inner{align-items:flex-start;flex-direction:column}.marquee-track{animation:none}.marquee span{font-size:12px}}
+    @media(max-width:650px){.container{width:min(100% - 24px,1180px)}nav{height:68px}.brand{font-size:19px}.brand-mark{width:38px;height:38px}.brand-mark img{width:38px;height:38px}.hero{padding:42px 0 42px}.hero-grid{gap:30px}h1{font-size:clamp(48px,15vw,72px);line-height:.92}.hero-copy{font-size:15px}.input-row{flex-direction:column}.download-btn,.url-wrap{width:100%}.download-btn{height:56px}.url-wrap{height:58px}.grab-foot{align-items:flex-start;flex-direction:column}.hero-art{min-height:450px}.tools{grid-template-columns:1fr}.tool{min-height:230px}.section-block,section.block{padding:78px 0}.section-title{font-size:43px}.story-card{padding:26px;min-height:330px}.story-card h3{font-size:31px}.stats{grid-template-columns:1fr}.faq{grid-template-columns:1fr}.cta-card{padding:30px 22px}.footer-inner{align-items:flex-start;flex-direction:column}.marquee-track{animation:none}.marquee span{font-size:12px}}
   
     @media (max-width: 980px){
       .hero-grid{grid-template-columns:1fr;gap:38px}.hero-art{min-height:560px}.media-stage{height:560px}
@@ -389,4 +389,12 @@ section.cta {
     font-size: 6px;
     padding: 5px 2px 1px;
   }
+}
+
+/* Robust mobile menu outside-click backdrop */
+.menu-backdrop{display:none;position:fixed;inset:0;background:transparent;border:0;padding:0;margin:0;z-index:30;cursor:default}
+.menu-backdrop.open{display:block}
+@media(max-width:680px){
+  .mobile-menu{position:relative;z-index:52}
+  .navlinks.open{z-index:51}
 }

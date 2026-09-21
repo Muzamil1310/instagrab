@@ -1,9 +1,22 @@
 {
-  "name": "InstaGrab",
-  "short_name": "InstaGrab",
+  "name": "ReelSloth",
+  "short_name": "ReelSloth",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#080a12",
   "theme_color": "#090a12",
-  "icons": [{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [
+    {
+      "src": "/sloth-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
