@@ -7,8 +7,22 @@
   const result = document.getElementById('result');
   const pasteBtn = document.getElementById('pasteBtn');
 
+  function trackEvent(name, params = {}) {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', name, params);
+    }
+  }
+
   clear.addEventListener('click', () => { input.value=''; input.focus(); result.className='result'; result.innerHTML=''; });
-  pasteBtn.addEventListener('click', async () => { try { input.value = await navigator.clipboard.readText(); input.focus(); } catch { input.focus(); } });
+  pasteBtn.addEventListener('click', async () => {
+    try {
+      input.value = await navigator.clipboard.readText();
+      input.focus();
+      trackEvent('paste_url', { method: 'clipboard_button' });
+    } catch {
+      input.focus();
+    }
+  });
 
   function esc(v){ return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
   function showError(title, message){
@@ -25,6 +39,7 @@
     e.preventDefault();
     const url = input.value.trim();
     if (!/https?:\/\/(www\.)?(instagram\.com|instagr\.am)\//i.test(url)) { showError('Invalid Instagram link', 'Please paste a valid Instagram post, Reel, or supported public URL.'); return; }
+    trackEvent('url_submit');
     button.disabled=true;
     button.innerHTML='<span class="loading"><span class="spinner"></span>Searching…</span>';
     result.className='result show';
@@ -71,6 +86,20 @@
 
       result.className='result show';
       result.innerHTML = '<div class="result-card"><div class="result-top"><div><div class="result-title">✓ '+esc(label)+'</div><div class="result-meta">'+esc(data.title || 'Instagram media')+' • '+esc(meta)+'</div></div><div class="result-actions"><a class="download-link" href="'+esc(mediaUrl)+'" download>'+actionLabel+'</a></div></div>'+renderPreview(previewUrl, previewType)+extra+'</div>';
+
+      trackEvent('media_ready', {
+        media_type: data.type || 'unknown'
+      });
+
+      const downloadLink = result.querySelector('.download-link');
+      if (downloadLink) {
+        downloadLink.addEventListener('click', () => {
+          trackEvent('download_click', {
+            media_type: data.type || 'unknown'
+          });
+        });
+      }
+
       result.scrollIntoView({behavior:'smooth',block:'nearest'});
     } catch(err) {
       showError(
