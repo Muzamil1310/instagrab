@@ -13,6 +13,13 @@
     }
   }
 
+  const mobileMQ = window.matchMedia('(max-width:650px)');
+  function syncPlaceholder(){
+    input.placeholder = mobileMQ.matches ? 'Paste Instagram URL…' : 'Paste an Instagram URL here…';
+  }
+  syncPlaceholder();
+  if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', syncPlaceholder); else mobileMQ.addListener(syncPlaceholder);
+
   clear.addEventListener('click', () => { input.value=''; input.focus(); result.className='result'; result.innerHTML=''; });
   pasteBtn.addEventListener('click', async () => {
     try {
