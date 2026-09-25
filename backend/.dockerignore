@@ -1,0 +1,10 @@
+# The build only needs requirements.txt and app/. Everything else in
+# backend/ (notably venv/) should never enter the build context.
+venv/
+**/__pycache__/
+*.py[cod]
+*.log
+.git/
+.gitignore
+Dockerfile
+.dockerignore

@@ -1,4 +1,4 @@
-# InstaGrab V1.0
+# ReelSloth V1.0
 
 Instagram media downloader backend + frontend.
 

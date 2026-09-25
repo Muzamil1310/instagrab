@@ -1,7 +1,7 @@
-fastapi
-uvicorn[standard]
-python-multipart
-yt-dlp
-requests
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+python-multipart==0.0.32
+yt-dlp==2026.8.19
+requests==2.34.2
 # Kept as a secondary fallback for Instagram image posts/carousels.
-gallery-dl>=1.32.12
+gallery-dl==1.32.13

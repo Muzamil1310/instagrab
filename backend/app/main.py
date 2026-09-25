@@ -16,6 +16,7 @@ import json
 import html as html_lib
 import asyncio
 import logging
+import os
 from collections import defaultdict, deque
 from urllib.parse import urlparse, urljoin
 import requests
@@ -27,7 +28,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("instagrab")
 
-app = FastAPI(title="InstaGrab API", version="1.0.0")
+app = FastAPI(title="ReelSloth API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -580,6 +581,22 @@ def run_direct_instagram(url: str, job_dir: Path, started_at: float) -> tuple[li
     return files, media
 
 
+def browser_cookie_fallback_enabled() -> bool:
+    """Whether gallery-dl may try --cookies-from-browser as a second attempt.
+
+    That option needs a local Chrome profile, which only exists on a developer
+    machine. Containers (Render) never have one, so attempting it there only
+    wastes part of the request budget. INSTAGRAB_BROWSER_COOKIES overrides the
+    default: 1/0 (or true/false, yes/no, on/off).
+    """
+    flag = os.environ.get("INSTAGRAB_BROWSER_COOKIES", "").strip().lower()
+    if flag in {"0", "false", "no", "off"}:
+        return False
+    if flag in {"1", "true", "yes", "on"}:
+        return True
+    return not os.environ.get("RENDER")
+
+
 def run_gallery_dl(url: str, job_dir: Path) -> tuple[list[Path], str]:
     """
     gallery-dl is used for Instagram post URLs because yt-dlp is primarily
@@ -609,13 +626,14 @@ def run_gallery_dl(url: str, job_dir: Path) -> tuple[list[Path], str]:
     # For the authenticated fallback we must explicitly use gallery-dl's
     # --cookies-from-browser option. On Windows, Chrome should be fully
     # closed while its cookie database is being read.
-    attempts = [
-        ("anonymous", base_cmd + [url]),
-        (
-            "chrome-session",
-            base_cmd + ["--cookies-from-browser", "chrome/instagram.com", url],
-        ),
-    ]
+    attempts = [("anonymous", base_cmd + [url])]
+    if browser_cookie_fallback_enabled():
+        attempts.append(
+            (
+                "chrome-session",
+                base_cmd + ["--cookies-from-browser", "chrome/instagram.com", url],
+            )
+        )
     last_detail = ""
 
     for attempt_name, cmd in attempts:
@@ -848,7 +866,7 @@ def download(req: DownloadRequest, request: Request):
                     "title": "Private Instagram account",
                     "message": (
                         "This post belongs to a private or restricted Instagram account. "
-                        "InstaGrab can only retrieve media that Instagram makes available "
+                        "ReelSloth can only retrieve media that Instagram makes available "
                         "through public links."
                     ),
                 },

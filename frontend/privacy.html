@@ -28,13 +28,7 @@
   <link rel="stylesheet" href="/assets/site.css" />
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1FERH7FB1B"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-1FERH7FB1B');
-</script>
+<script type="module" src="/assets/analytics.js"></script>
 </head>
 <body>
 <header>
@@ -64,13 +58,15 @@
       <p>When a download is requested, the backend may create a temporary job folder containing retrieved media and a generated ZIP for a carousel. Jobs are designed to expire after approximately 60 minutes, after which the cleanup process removes the job folder. Temporary files can also disappear sooner when the hosting instance restarts.</p>
       <h2>4. Technical request data</h2>
       <p>The backend uses the connecting client address in memory for a short-window request-rate limiter. The hosting provider may also process ordinary infrastructure data such as request logs, timestamps, and network information according to its own policies.</p>
-      <h2>5. Cookies and tracking</h2>
-      <p>ReelSloth does not require an account or first-party login cookie. The site may load fonts from Google Fonts. Any future analytics or advertising services will have their own data practices and will be documented before they are introduced.</p>
+      <h2>5. Cookies and analytics</h2>
+      <p>ReelSloth does not require an account or a first-party login cookie. The site loads fonts from Google Fonts.</p>
+      <p>The site uses Google Analytics 4 with measurement ID <strong>G-1FERH7FB1B</strong>. It measures page views and downloader actions such as pasting a link, opening a result, and starting a download. Google Analytics uses cookies and similar technologies to distinguish visits and can collect information such as your IP address, browser and device type, and the pages you open. Google processes that data under its own terms — see <a href="https://policies.google.com/technologies" target="_blank" rel="noopener noreferrer">How Google uses data</a> and the <a href="https://policies.google.com/technologies/partners" target="_blank" rel="noopener noreferrer">Google Analytics data processing terms</a>.</p>
+      <p>You can opt out with <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google's Analytics opt-out tool</a> or by blocking these cookies in your browser. ReelSloth does not run advertising, retargeting, or cross-site tracking services.</p>
       <h2>6. Third-party services</h2>
-      <p>Media retrieval depends on Instagram and the hosting/extraction infrastructure used by ReelSloth. Their availability, policies, and technical behavior are outside ReelSloth's control.</p>
+      <p>Media retrieval depends on Instagram, Google Fonts, Google Analytics, and the hosting/extraction infrastructure used by ReelSloth. Their availability, policies, and technical behavior are outside ReelSloth's control.</p>
       <h2>7. Contact</h2>
       <p>For technical issues or privacy questions, see the <a href="/contact.html">Contact page</a>.</p>
-      <p class="last-updated">Last updated: September 20, 2026</p>
+      <p class="last-updated">Last updated: September 26, 2026</p>
     </article>
     <aside class="content-card side-card reveal"><div class="side-label">Privacy at a glance</div><a href="#">No Instagram password</a><a href="#">Temporary download jobs</a><a href="#">Short-window rate limiting</a><a href="/contact.html">Contact</a></aside>
   </div></section>

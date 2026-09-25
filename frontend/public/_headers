@@ -3,6 +3,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://instagrab-nnl9.onrender.com https://*.google-analytics.com https://www.googletagmanager.com; media-src 'self' https://instagrab-nnl9.onrender.com; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://instagrab-nnl9.onrender.com; manifest-src 'self'; upgrade-insecure-requests
 
 https://instagrab-be5.pages.dev/*
   X-Robots-Tag: noindex
