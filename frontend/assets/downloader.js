@@ -38,7 +38,7 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const url = input.value.trim();
-    if (!/https?:\/\/(www\.)?(instagram\.com|instagr\.am)\//i.test(url)) { showError('Invalid Instagram link', 'Please paste a valid Instagram post, Reel, or supported public URL.'); return; }
+    if (!/^https:\/\/(?:[\w-]+\.)?(?:instagram\.com|instagr\.am)\/(?:[^/?#]+\/)*(?:p|reel|reels|tv|share|s)\/[A-Za-z0-9_-]+/i.test(url)) { showError('That link is not a post or Reel', 'Open the Instagram post or Reel you want and copy its link.'); return; }
     trackEvent('url_submit');
     button.disabled=true;
     button.innerHTML='<span class="loading"><span class="spinner"></span>Searching…</span>';

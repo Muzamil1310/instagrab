@@ -15,9 +15,17 @@ import sys
 import json
 import html as html_lib
 import asyncio
+import logging
 from collections import defaultdict, deque
 from urllib.parse import urlparse, urljoin
 import requests
+import yt_dlp.utils
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+logger = logging.getLogger("instagrab")
 
 app = FastAPI(title="InstaGrab API", version="1.0.0")
 app.add_middleware(
@@ -56,9 +64,10 @@ def validate_instagram(url: str) -> bool:
 
 
 def rate_limit_key(request: Request) -> str:
-    # Use the direct client address. When deploying behind a trusted reverse
-    # proxy, configure the proxy/uvicorn correctly rather than trusting an
-    # arbitrary X-Forwarded-For header from the public internet.
+    # Uvicorn runs with --proxy-headers --forwarded-allow-ips="*", so behind
+    # Render's proxy this is already the real client address rather than the
+    # proxy's own IP. Render resets X-Forwarded-For to the real client first,
+    # which is the value uvicorn picks.
     return request.client.host if request.client else "unknown"
 
 
@@ -70,6 +79,7 @@ def enforce_rate_limit(request: Request) -> None:
     while bucket and bucket[0] <= cutoff:
         bucket.popleft()
     if len(bucket) >= RATE_LIMIT_MAX_REQUESTS:
+        logger.warning("rate limit hit key=%s", key)
         raise HTTPException(
             429,
             {
@@ -131,17 +141,22 @@ def cleanup_rate_buckets() -> None:
 async def cleanup_loop() -> None:
     while True:
         await asyncio.sleep(10 * 60)
-        cleanup_expired_jobs()
-        cleanup_rate_buckets()
+        try:
+            cleanup_expired_jobs()
+            cleanup_rate_buckets()
+        except Exception:
+            logger.exception("cleanup loop failed")
 
 
 @app.on_event("startup")
 async def start_cleanup_loop() -> None:
     app.state.cleanup_task = asyncio.create_task(cleanup_loop())
+    logger.info("startup complete download_dir=%s", DOWNLOAD_DIR)
 
 
 @app.on_event("shutdown")
 async def stop_cleanup_loop() -> None:
+    logger.info("shutdown")
     task = getattr(app.state, "cleanup_task", None)
     if task:
         task.cancel()
@@ -179,16 +194,31 @@ def media_files(job_dir: Path) -> list[Path]:
     )
 
 
-def run_yt_dlp(url: str, job_dir: Path) -> tuple[list[Path], dict | None, str]:
+def run_yt_dlp(url: str, job_dir: Path, started_at: float) -> tuple[list[Path], dict | None, str]:
     output = job_dir / "media_%(autonumber)03d.%(ext)s"
+
+    def guard(state: dict) -> None:
+        if time.monotonic() - started_at > MAX_REQUEST_SECONDS:
+            raise yt_dlp.utils.DownloadCancelled("The media request took too long")
+        downloaded = state.get("downloaded_bytes") or 0
+        expected = state.get("total_bytes") or state.get("total_bytes_estimate") or 0
+        if max(downloaded, expected) > MAX_FILE_BYTES:
+            raise yt_dlp.utils.DownloadCancelled("A media file exceeded the 250 MB safety limit")
+
     opts = {
         "outtmpl": str(output),
+        # The URL is already restricted to a single post/Reel, so the playlist
+        # form here only ever covers that post's carousel items.
         "noplaylist": False,
         "quiet": True,
         "no_warnings": True,
         "restrictfilenames": True,
         "socket_timeout": 15,
         "retries": 2,
+        "fragment_retries": 3,
+        "max_filesize": MAX_FILE_BYTES,
+        "max_downloads": MAX_CAROUSEL_ITEMS,
+        "progress_hooks": [guard],
     }
 
     with yt_dlp.YoutubeDL(opts) as ydl:
@@ -637,6 +667,19 @@ def is_reel_url(url: str) -> bool:
     return "/reel/" in path or "/reels/" in path
 
 
+SUPPORTED_MEDIA_PATH = re.compile(r"/(?:p|reel|reels|tv|share|s)/[A-Za-z0-9_-]+")
+
+
+def is_supported_media_url(url: str) -> bool:
+    """Reject profiles, hashtags and explore pages so yt-dlp cannot be pointed
+    at a whole account as if it were a single post."""
+    try:
+        path = urlparse(url).path or ""
+    except ValueError:
+        return False
+    return bool(SUPPORTED_MEDIA_PATH.search(path))
+
+
 def build_result(job_id: str, files: list[Path], info: dict | None, url: str) -> dict:
     files = [p for p in files if p.exists() and p.stat().st_size > 0]
     if len(files) > MAX_CAROUSEL_ITEMS:
@@ -709,13 +752,37 @@ def download(req: DownloadRequest, request: Request):
     url = str(req.url)
     if not validate_instagram(url):
         raise HTTPException(400, "For V1, please enter a public Instagram URL.")
+    if not is_supported_media_url(url):
+        logger.info("rejected unsupported url client=%s url=%s", rate_limit_key(request), url)
+        raise HTTPException(
+            400,
+            {
+                "code": "UNSUPPORTED_URL",
+                "title": "That link is not a post or Reel",
+                "message": (
+                    "ReelSloth handles single Instagram posts, Reels and videos. "
+                    "Open the post you want and copy its link."
+                ),
+            },
+        )
 
     job_id = uuid.uuid4().hex
     job_dir = DOWNLOAD_DIR / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     started_at = time.monotonic()
+    logger.info("download start job=%s client=%s url=%s", job_id, rate_limit_key(request), url)
 
     errors = []
+
+    def finish(payload: dict) -> dict:
+        logger.info(
+            "download ok job=%s duration=%.1fs type=%s count=%s",
+            job_id,
+            time.monotonic() - started_at,
+            payload.get("type"),
+            payload.get("count"),
+        )
+        return payload
 
     try:
         # First use a direct Instagram resolver for posts. It reads the media
@@ -728,9 +795,10 @@ def download(req: DownloadRequest, request: Request):
                     "title": (media.get("username") or "Instagram") + " media",
                     "entries": [{"id": str(i)} for i, _ in enumerate(files)],
                 }
-                return build_result(job_id, files, info, url)
+                return finish(build_result(job_id, files, info, url))
             except Exception as exc:
                 errors.append(f"instagram-direct: {exc}")
+                logger.warning("extractor failed job=%s name=instagram-direct error=%s", job_id, exc)
                 for child in list(job_dir.iterdir()):
                     if child.is_file():
                         child.unlink(missing_ok=True)
@@ -739,22 +807,26 @@ def download(req: DownloadRequest, request: Request):
             try:
                 files, _ = run_gallery_dl(url, job_dir)
                 enforce_job_limits(job_dir, started_at)
-                return build_result(job_id, files, None, url)
+                return finish(build_result(job_id, files, None, url))
             except Exception as exc:
                 errors.append(f"gallery-dl: {exc}")
+                logger.warning("extractor failed job=%s name=gallery-dl error=%s", job_id, exc)
                 for child in list(job_dir.iterdir()):
                     if child.is_file():
                         child.unlink(missing_ok=True)
 
         # Reels/videos, and a last-resort fallback for post URLs.
         try:
-            files, info, _ = run_yt_dlp(url, job_dir)
+            files, info, _ = run_yt_dlp(url, job_dir, started_at)
             enforce_job_limits(job_dir, started_at)
-            return build_result(job_id, files, info, url)
+            return finish(build_result(job_id, files, info, url))
         except Exception as exc:
             errors.append(f"yt-dlp: {exc}")
+            logger.warning("extractor failed job=%s name=yt-dlp error=%s", job_id, exc)
 
         detail = " | ".join(errors)
+        logger.info("download failed job=%s duration=%.1fs detail=%s",
+                    job_id, time.monotonic() - started_at, detail)
 
         # Instagram can expose a very specific message when a post belongs to
         # a private/restricted account. Surface a friendly user-facing error
@@ -782,6 +854,19 @@ def download(req: DownloadRequest, request: Request):
                 },
             )
 
+        # Bounded by MAX_REQUEST_SECONDS through enforce_job_limits and through
+        # the yt-dlp progress guard, so surface that as a timeout rather than as
+        # a generic "media unavailable".
+        if "took too long" in lowered:
+            raise HTTPException(
+                408,
+                {
+                    "code": "TIMEOUT",
+                    "title": "That took too long",
+                    "message": "The download did not finish in time. Please try the link again.",
+                },
+            )
+
         # A login redirect without the explicit private-account marker is not
         # enough to claim that the account is private; Instagram also returns
         # login-required responses for rate limits and other access changes.
@@ -797,10 +882,23 @@ def download(req: DownloadRequest, request: Request):
 
         raise RuntimeError(detail or "No media could be retrieved")
 
-    except HTTPException:
+    except HTTPException as exc:
+        logger.warning(
+            "download rejected job=%s duration=%.1fs status=%s detail=%r",
+            job_id,
+            time.monotonic() - started_at,
+            exc.status_code,
+            exc.detail,
+        )
         shutil.rmtree(job_dir, ignore_errors=True)
         raise
     except Exception as exc:
+        logger.exception(
+            "download error job=%s duration=%.1fs error=%s",
+            job_id,
+            time.monotonic() - started_at,
+            exc,
+        )
         shutil.rmtree(job_dir, ignore_errors=True)
         raise HTTPException(
             422,
